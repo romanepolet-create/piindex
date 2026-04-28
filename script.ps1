@@ -1,3 +1,5 @@
+$ErrorActionPreference = "Stop"
+
 $target = "0768676905"
 # Read progress from the repo file
 $startValue = [int](Get-Content "progress.txt")
