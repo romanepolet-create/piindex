@@ -22,9 +22,23 @@ for ($i = $startValue; $i -le 100000000000; $i += 100000000) {
     $zip = "pi_${start}_${end}.zip"
     $folder = "pi_$start"
 
-    Write-Host "⬇️ Downloading $zip..."
-    Invoke-WebRequest -Uri "https://files.pilookup.com/pi/$start-$end.zip" -OutFile $zip
+ Write-Host "⬇️ Downloading $zip..."
+    $url = "https://files.pilookup.com/pi/$start-$end.zip"
+    Write-Host "Attempting URL: $url"
     
+    Invoke-WebRequest -Uri $url -OutFile $zip
+    
+    # --- NEW SAFETY CHECK ---
+    $fileSize = (Get-Item $zip).Length
+    if ($fileSize -lt 10000000) { # If it's less than 10MB
+        Write-Host "❌ ERROR: The downloaded file is fake or empty! Size: $fileSize bytes."
+        Write-Host "The URL might be wrong or the server is blocking GitHub."
+        Write-Host "Here is what the server actually sent us:"
+        Get-Content $zip -TotalCount 15 # Prints the first 15 lines of the fake file
+        exit 1 # Kills the script completely
+    }
+    # ------------------------
+
     Write-Host "📦 Extracting $zip..."
     Expand-Archive $zip -DestinationPath $folder
     
