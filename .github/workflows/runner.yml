@@ -2,14 +2,16 @@ name: Pi Search Runner
 
 on:
   schedule:
-    - cron: '0 */6 * * *' # Runs every 6 hours
-  workflow_dispatch: # Allows you to trigger it manually from the Actions tab
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
 
 jobs:
   run-search:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Crucial: Allows the bot to commit back to the repo
+      contents: write
+      issues: write
+      actions: write
     
     steps:
       - name: Checkout repository
@@ -19,13 +21,13 @@ jobs:
         shell: pwsh
         run: ./script.ps1
 
-     - name: Commit and Push Progress (If not found)
+      - name: Commit and Push Progress
         run: |
           if [ ! -f SUCCESS.txt ]; then
             git config --global user.name "github-actions[bot]"
             git config --global user.email "github-actions[bot]@users.noreply.github.com"
             git add progress.txt
             git commit -m "Save progress from automated run" || echo "No changes to commit"
-            git pull --rebase origin main  # <--- THIS FIXES THE REJECTED ERROR
+            git pull --rebase origin main
             git push
           fi
