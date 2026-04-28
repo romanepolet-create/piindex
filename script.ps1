@@ -3,11 +3,11 @@ $target = "0768676905"
 $startValue = [int](Get-Content "progress.txt")
 
 # Set a limit on how many loops to do per GitHub Action run
-# You'll have to test this to see how many it can do in ~5 hours
 $loopsPerRun = 10 
 $currentLoop = 0
 
-for ($i = $startValue; $i -le 1000000000; $i += 100000000) {
+# Limit increased to 100 Billion so it doesn't stop too early!
+for ($i = $startValue; $i -le 100000000000; $i += 100000000) {
     if ($currentLoop -ge $loopsPerRun) {
         Write-Host "Chunk finished, saving progress for next run..."
         break
@@ -18,8 +18,14 @@ for ($i = $startValue; $i -le 1000000000; $i += 100000000) {
     $zip = "pi_${start}_${end}.zip"
     $folder = "pi_$start"
 
-    # ... your download, extract, and search logic goes here ...
-    # (Keep your Invoke-WebRequest, Expand-Archive, Select-String)
+    Write-Host "Downloading $zip..."
+    Invoke-WebRequest -Uri "https://files.pilookup.com/pi/$start-$end.zip" -OutFile $zip
+    
+    Write-Host "Extracting $zip..."
+    Expand-Archive $zip -DestinationPath $folder
+    
+    Write-Host "Searching for $target..."
+    $result = Select-String -Path ".\$folder\*.txt" -Pattern $target
 
     if ($result) {
         Write-Host "FOUND in range $start-$end"
@@ -32,7 +38,8 @@ for ($i = $startValue; $i -le 1000000000; $i += 100000000) {
         exit
     }
 
-    # Clean up
+    # Clean up (Deletes the files)
+    Write-Host "Cleaning up files..."
     Remove-Item $zip -ErrorAction SilentlyContinue
     Remove-Item $folder -Recurse -Force -ErrorAction SilentlyContinue
 
