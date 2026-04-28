@@ -23,7 +23,12 @@ for ($i = $startValue; $i -le 1000000000; $i += 100000000) {
 
     if ($result) {
         Write-Host "FOUND in range $start-$end"
-        # Optional: write the success to a file and push that too!
+        
+        # Write the success message to a file
+        $message = "🎉 SUCCESS! The target $target was found in the zip file: pi_${start}_${end}.zip"
+        $message | Out-File "SUCCESS.txt"
+        
+        # Exit the script immediately
         exit
     }
 
